@@ -31,7 +31,7 @@ void play(Field &playField, char select);
 //----------------------- MAIN ----------------------//
 int main()
 {
-	int size = 10;
+	int size = 10;						// Field size
 	vector<string> partitionFile;
 	string fileName;
 	map<string, Rectangle> partition;	
@@ -41,7 +41,7 @@ int main()
 	unsigned choice;
 	char select;
 	
-	// random genarator nano Sekunden statt sekunden
+	// Random generator. Nano Sekunden statt sekunden
 	struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     srand((time_t)ts.tv_nsec);
@@ -50,6 +50,7 @@ int main()
 	//------------------User Input------------------//
 	
 	cout << "\n  -------------- SHIKAKU ---------------- \n" << endl;
+	// Wait for user input
 	while(true)
 	{
 		cout << "Wählen Sie eine Funktion aus: \n";
@@ -73,14 +74,14 @@ int main()
 				cout << "Die Datei kann nicht gelesen werden" << endl;
 				exit(0);
 			}
-			size = stoi(partitionFile[0]);							// Die erste Zeile zeigt die groesse
+			size = stoi(partitionFile[0]);									// Die erste Zeile zeigt die groesse des Feldes
 			partitionFile.erase(partitionFile.begin());				
-			for(string &str : partitionFile)						// \n Zeichen ausschneiden
+			for(string &str : partitionFile)								// '\n' Zeichen ausschneiden
 			{
 				str.erase(remove(str.begin(), str.end(), '\r'), str.end());
 				str.erase(remove(str.begin(), str.end(), '\n'), str.end());
 			}	
-			playField.setFieldSize(size);								// Das Feld der gegebenen groesse
+			playField.setFieldSize(size);									// Das Feld der gegebenen Groesse
 
 			//Prüfen ob die gegebene Datei richtig sind 
 			if(partitionFile.size() == pow(size, 2))
@@ -99,10 +100,9 @@ int main()
 			
 		// Fall 2 : Die Belegung generieren	
 		case 2:
-
-			solutionField = generateNewField(partition, size);
-			playField = replaceWithNumbers(partition, size);
-			play(playField, solutionField, select, size, partition);
+			solutionField = generateNewField(partition, size);			// Die Belegung glecih mit Lösung generieren
+			playField = replaceWithNumbers(partition, size);			// Die Buchstanben mit Nummern ersaetzen
+			play(playField, solutionField, select, size, partition);	// Starte das Spiel
 			break;
 		
 		// Fall 3 : Abschliessen
@@ -120,30 +120,30 @@ Field generateNewField(map<string, Rectangle> &partition, int size)
 {
 	partition.clear();
 	Field customField(size);
-	int x;																// x - Koordinate des Kästchens
-	int y;																// y - Koordinate des Kästchens
+	int x;																// x - Koordinate des Kaestchens
+	int y;																// y - Koordinate des Kaestchens
 	int area;															// flaeche des Rechtecks
-	string albet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ*+#&?%123456789-0=";		// alle Mögliche Schluessel
+	string albet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ*+#&?%123456789-0=";		// alle Moegliche Schluessel
 	int i = 0;															// Index des Buchstaben
-	bool placed;														// True -> fall den Rechteck platziert werden könnte, sonst False
-	Rectangle rect = Rectangle();										// Default-Instantz der Klasse "Rechteck"
+	bool placed;														// True -> falls ein Rechteck platziert werden konnte, sonst False
+	Rectangle rect = Rectangle();										// Default-Instanz der Klasse "Rechteck"
 	int sum = 0;
 	
 	while(true)
 	{
 		/*
 		Sobald keine freie Zelle mehr gibt, generiere ein Rechteck zufaelliger Flache und Groesse
-		Versuche das zu platzieren, sonst geenriere ein neues Rechteck und versuche noochmal
-		Fall es einzelne Kaestchen gibt (dh. die Zelle links und recht sind besetzt) geberiere ein Rechteck 1xh
+		Versuche das zu platzieren, sonst generiere ein neues Rechteck und versuche nochmal
+		Falls es einzelne Kaestchen gibt (dh. die Zelle links und recht sind besetzt) generiere ein Rechteck 1xh
 		, versuche das zu platzieren, sonst hinzuefuge das zum Nachbaren mit der Hoehe bzw Breite == 1
 		Gebe zurueck ein Feld mit Partitionen, das wird spaeter fuer funktion "show solution" benutzt 
 		*/
-		tie(x, y) = customField.findFirstFreeCell();											// Suche auf die Koordinaten der ersten freien Zelle, von links nach rechts, von oben nach unten
-		if(x == -1) break;																		// Falls die Koordinaten nicht gefunden, das Feld ist komplett besetzt
+		tie(x, y) = customField.findFirstFreeCell();														// Suche auf die Koordinaten der ersten freien Zelle, von links nach rechts, von oben nach unten
+		if(x == -1) break;																					// Falls die Koordinaten nicht gefunden sind, das Feld ist komplett besetzt
 
-		if(((y == 9) && (x == 9)) || ((y == 9) && (customField.field[y][x+1] != customField.freeCell)))			// Falls nur einzelne Zelle ist gebllieben, dann die zum Rechteck 1xh, oder wx1 mergen
+		if(((y == 9) && (x == 9)) || ((y == 9) && (customField.field[y][x+1] != customField.freeCell)))		// Falls nur einzelne Zelle gebllieben ist, die zum Rechteck 1xh, oder wx1 'mergen'
 		{
-			if(x == 0)																			// fuer die Zelle mit Koordinaten [0, 9]. Mergen die zum oberen Rechteck
+			if(x == 0)																						// fuer die Zelle mit Koordinaten [0, 9]. 'Mergen' die zum oberen Rechteck
 			{
 				customField.field[y][x] = customField.field[y - 1][x];							
 				string key = customField.field[y - 1][x];
@@ -152,7 +152,7 @@ Field generateNewField(map<string, Rectangle> &partition, int size)
 			}				
 			else if((customField.field[y - 1][x] == customField.field[y - 2][x]) && (customField.field[y - 1][x] != customField.field[y - 1][x - 1]))
 			{
-				customField.field[y][x] = customField.field[y - 1][x];							// fall nur ein Kaestchen und das obere Rechteck
+				customField.field[y][x] = customField.field[y - 1][x];							// falls nur ein Kaestchen und das obere Rechteck
 				string key = customField.field[y - 1][x];										// die Breite 1 hat, hinzuefuege zum
 				partition[key].updateArea(1);													// und vergroese die entsprechende Flaeche auf 1
 				placed = false;
@@ -165,7 +165,7 @@ Field generateNewField(map<string, Rectangle> &partition, int size)
 				placed = false;																	
 			}	
 		}
-		else if((x == 9) || (customField.field[y][x+1] != customField.freeCell))					// Falls das letzte Zelle in der Zeile, oder rechter Nachbar ist besetzt
+		else if((x == 9) || (customField.field[y][x+1] != customField.freeCell))				// Falls das letzte Zelle in der Zeile, oder rechter Nachbar ist besetzt
 		{																		// Generiere Rechteck 1xh
 			int dist = size - y - 1; 											// maximale moegliche Laenge bis zur Grenze
 			int h = rand()%dist+2;
@@ -265,6 +265,9 @@ void displayMenu()
 
 void play(Field &playField, Field solutionField, char select, int size, map<string, Rectangle> &partition)
 {
+	/*
+	Play and print game field till user, doenst type 'x' to exit game
+	*/
 	while(select != 'x')
 	{
 		system("clear");								
@@ -286,7 +289,7 @@ void play(Field &playField, Field solutionField, char select, int size, map<stri
 			solutionField = generateNewField(partition, size);
 			playField = replaceWithNumbers(partition, size);
 		}
-		while(select == 'l')
+		while(select == 'l')								// Loesung zeigen
 		{
 			system("clear");
 			showSolution(solutionField);
@@ -318,14 +321,14 @@ void play(Field &playField, char select)
 		else if(select == 'r') playField.reset();			// Alle Grenze zuruecksetzen
 		else if(select == 'z') playField.undo();			// die letzte geloeschte Grenze zuruecksetzen
 		else if(select == 'q') playField.recover();			// die aktuelle geloeschte Grenze zuruecksetzen
-		while(select == 'l' || select == 'g')
-		{
-			system("clear");
-			cout << "- NOT AVAILABLE -";
-			system("stty raw");
-			select = getchar();
-			system("stty cooked");
-		}
+		// while(select == 'l' || select == 'g')
+		// {
+		// 	system("clear");
+		// 	cout << "- NOT AVAILABLE -";
+		// 	system("stty raw");
+		// 	select = getchar();
+		// 	system("stty cooked");
+		// }
 	}	
 }
 

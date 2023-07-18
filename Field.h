@@ -13,6 +13,11 @@ Das Projekt: SHIKAKU-Spiel
 using namespace std;
 
 //-----------------RectangleClass------------------//
+/*
+Class for single rectangle/block on Field. For blocks with prime number width or height, the second measure is 1.
+For other blocks generate all possible tuples (width, height).
+Minimal Rectangle is 2x1, max has area 12.
+*/
 class Rectangle
 {
 friend class Field;
@@ -22,9 +27,9 @@ private:
 	int area = 1;
 	int x = 0;				// x-Koordinate
 	int y = 0;				// y-Koordinate
-	char sign;			// Zeichen des Rechtecks
+	char sign;				// Zeichen des Rechtecks
 	
-	// Pruefen ob die Zahl ist Prim
+	// Pruefen ob die Zahl eine Primzahl ist
 	bool isPrime(int number)
 	{
 		bool isPrime = true;
@@ -141,6 +146,14 @@ public:
 
 
 //-----------------FieldClass------------------//
+/*
+Class for shikaku field. Field ist two-dim array/vector.
+Mit XY-Koordinatensystem.
+Y
+|
+|
+|_______X
+*/
 class Field
 {
 public:
@@ -148,7 +161,7 @@ public:
 	vector<vector<string>> field;
 	vector <string> row;
 	string freeCell = " ";
-	int xCoord = 0;				// Koordinaten des Kursors
+	int xCoord = 0;				//Start-Koordinaten des Kursors
 	int yCoord = 2;
 	vector<string> xyGrid;		// Vektor mit Koordinaten xy, als string fuer "geloeschte" Grenzen
 
@@ -187,7 +200,7 @@ public:
 		}
 	}
 	
-	// Das Fels ausdrueken
+	// Das Feld ausdrueken in die Konsole
 	void print()
 	{
 		cout << " ------------- Die Belegung -------------- \n";
@@ -230,9 +243,14 @@ public:
 	}
 
 	// Rechteck platzieren
+	/*
+	Die Methode belegt das Spielfeld mit den Instazen der Klasse 'Rectangle'.
+	Die Belegung folgt vom links mach rechts, oben nach unten.
+	x,y -start Koordinaten, bzw. obere linke Ecke des Rechteckes.
+	*/
 	bool placeRect(Rectangle &rect, int x, int y)
 	{
-		if((x + rect.width <= size) && (y + rect.height <= size))			// wenn rechte Grenze nicht erreicht wurde,
+		if((x + rect.width <= size) && (y + rect.height <= size))			// wenn die rechte Grenze nicht erreicht wurde,
 		{																	// dann platzieren
 			for(int i = y; i < rect.height + y; i++)						
 			{
@@ -242,7 +260,7 @@ public:
 				}
 			}
 			
-			//Fall alle Kaestchen fuer das Rechteck frei sind, schreibe die Werte ("ABCD...etc") rein
+			//Falls alle Kaestchen fuer das Rechteck frei sind, schreibe die Werte ("ABCD...etc") rein
 			for(int i = y; i < rect.height + y; i++)						
 			{
 				for(int j = x; j < rect.width + x; j++)
@@ -254,7 +272,7 @@ public:
 			rect.y = y;
 			return true;
 		}
-		else if((x + rect.width <= size) && (y + rect.height <= size))		// Fall die Kaestchen sind besetzt, drehen und versuchen noch mal
+		else if((x + rect.width <= size) && (y + rect.height <= size))		// Fall die Kaestchen sind besetzt, das Rechteck drehen und versuchen noch mal
 		{
 			// drehung
 			rect.rotate();
@@ -267,7 +285,7 @@ public:
 				}
 			}
 			
-			//Fall alle Kaestchen fuer das Rechteck frei sind, schreibe die Werte ("ABCD...etc") rein
+			//Falls alle Kaestchen fuer das Rechteck frei sind, schreibe die Werte ("ABCD...etc") rein
 			for(int i = y; i < rect.height + y; i++)
 			{
 				for(int j = x; j < rect.width + x; j++)
@@ -275,11 +293,11 @@ public:
 					field[i][j] = rect.sign;
 				}
 			}
-			rect.x = x;
-			rect.y = y;
-			return true;
+			rect.x = x;							// setze x-koordinate des Rechteckes. Obere linke Ecke
+			rect.y = y;							// setze y-koordinate des Rechteckes. Obere linke Ecke
+			return true;						// return true, wenn ein Rechteck wurde erfolgreich platziert
 		}
-		else return false;						// Fall platzierung war nicht moeglich, return false und warte auf ein neues Rechteck
+		else return false;						// Falls die Platzierung nicht moeglich war, return false und wiederhole mit einem neuen Rechteck
 	}
 	
 	// Suche nach erste freie Zelle, sonst gebe zuerueck x = -1, y = -1 -> als nicht gefunden
@@ -309,16 +327,16 @@ public:
 		switch(dir)
 		{
 			case 'w':
-				if(yCoord != 0) yCoord-=1;			// Kursor nach oben bewegen
+				if(yCoord != 0) yCoord-=1;			// Kursor nach oben bewegen, falls die obere Grenze nicht erreich wurde
 				break;
 			case 'a':
-				if(xCoord != 0) xCoord-=1;			// Kursor nach links bewegen
+				if(xCoord != 0) xCoord-=1;			// Kursor nach links bewegen, falls die linke Grenze nicht erreicht wurde
 				break;
 			case 's':
-				if(yCoord != size*2-1) yCoord+=1;	// Kursor nach unten bewegen
+				if(yCoord != size*2-1) yCoord+=1;	// Kursor nach unten bewegen, fall die untere Grenze nicht erreich wurde
 				break;
 			case 'd':
-				if(xCoord != size*2-1) xCoord+=1;	// Kursor nach rechts bewegen
+				if(xCoord != size*2-1) xCoord+=1;	// Kursor nach rechts bewegen, falls die rechte Grenze nicht erreicht wurde
 				break;
 		}
 	}
